@@ -1,0 +1,30 @@
+/* Sunset Platinum — theme. One warm "paper" look with a coral accent, and a
+   dark "night" look that follows the reader's system preference. */
+
+:root {
+  --page-bg: #f6f3ee;
+  --card-bg: #ffffff;
+  --ink: #1d2129;
+  --muted: #626a75;
+  --line: #ddd5c8;
+  --accent: #d24e2a;
+  --on-accent: #ffffff;
+  --track: #e6dfd3;
+  --warn-bg: #fbeee8;
+  --shadow: 0 1px 4px rgba(29, 33, 41, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #0f1218;
+    --card-bg: #171c24;
+    --ink: #edeae4;
+    --muted: #8e96a3;
+    --line: #2c3340;
+    --accent: #ff6b4a;
+    --on-accent: #1d2129;
+    --track: #262c38;
+    --warn-bg: #2a1d18;
+    --shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  }
+}
