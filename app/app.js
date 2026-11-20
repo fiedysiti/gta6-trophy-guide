@@ -1,14 +1,16 @@
 // Sunset Platinum — app bootstrap: loads the catalogue, owns the earned / planned /
-// spoiler state, wires the toolbar, tabs and filters, and renders every view.
-// The app sets window.__shotReady once the first render is done so screenshots
-// can be taken at a stable moment.
+// spoiler state, wires the toolbar, tabs, filters, sort order and keyboard
+// shortcuts, and renders every view. Shortcuts: "/" jumps to the search box,
+// "h" toggles "hide earned". The app sets window.__shotReady once the first
+// render is done so screenshots can be taken at a stable moment.
 import { loadCatalog } from './js/catalog.js';
-import { applyFilters, countByGrade } from './js/filtering.js';
+import { applyFilters, countByGrade, estimateRemainingHours, openMissables, sortTrophies } from './js/filtering.js';
 import { buildTrophyCard } from './js/cards.js';
 import { renderMissableList, renderPlanList, renderRoadmap } from './js/screens.js';
 import {
-  EARNED_KEY, PLAN_KEY, downloadProgress, loadIdSet, loadSpoilers, readProgressFile,
-  saveIdSet, saveSpoilers,
+  EARNED_KEY, PLAN_KEY, buildProgressSummary, copyProgressToClipboard,
+  downloadProgress, loadHideEarned, loadIdSet, loadSort, loadSpoilers, readProgressFile,
+  saveHideEarned, saveIdSet, saveSort, saveSpoilers,
 } from './js/storage.js';
 
 const $ = (id) => document.getElementById(id);
@@ -19,6 +21,8 @@ const state = {
   earned: loadIdSet(EARNED_KEY),
   planned: loadIdSet(PLAN_KEY),
   spoilers: loadSpoilers(),
+  hideEarned: loadHideEarned(),
+  sort: loadSort(),
   revealed: new Set(),
   view: 'checklist',
   filters: { query: '', grade: 'all', category: 'all', missable: 'all', earned: 'all' },
@@ -60,12 +64,18 @@ function renderProgress() {
   $('gradeCounts').textContent = ['platinum', 'gold', 'silver', 'bronze']
     .map((g) => `${counts[g][0]}/${counts[g][1]} ${g}`)
     .join(' · ');
+  const hoursLeft = estimateRemainingHours(state.trophies, state.earned);
+  const open = openMissables(state.trophies, state.earned).length;
+  $('statsLine').textContent = hoursLeft > 0
+    ? `About ${hoursLeft}h of hunting left · ${open} missable ${open === 1 ? 'trophy' : 'trophies'} still open`
+    : 'Every trophy earned — the platinum is yours.';
   $('missableBadge').textContent = String(state.trophies.filter((t) => t.missable).length);
 }
 
 function renderChecklist() {
   const ctx = cardContext();
-  const shown = applyFilters(state.trophies, state.filters, state.earned);
+  const filtered = applyFilters(state.trophies, { ...state.filters, hideEarned: state.hideEarned }, state.earned);
+  const shown = sortTrophies(filtered, state.sort);
   const grid = $('cards');
   grid.replaceChildren();
   for (const trophy of shown) grid.append(buildTrophyCard(trophy, ctx));
@@ -78,8 +88,10 @@ function renderAll() {
   renderChecklist();
   renderRoadmap($('roadmap'), state.trophies, state.earned);
   renderPlanList($('planner'), $('planCount'), $('planEmpty'), state.trophies, state.planned, (t) => buildTrophyCard(t, cardContext()));
-  renderMissableList($('missableList'), $('missableCount'), state.trophies, (t) => buildTrophyCard(t, cardContext()));
+  renderMissableList($('missableList'), $('missableCount'), state.trophies, state.earned, (t) => buildTrophyCard(t, cardContext()));
   $('spoilerToggle').checked = state.spoilers;
+  $('hideEarnedToggle').checked = state.hideEarned;
+  $('sortSelect').value = state.sort;
 }
 
 function showView(name) {
@@ -101,12 +113,36 @@ function startingView() {
   return VIEWS.includes(hash) ? hash : 'checklist';
 }
 
+function flashCopyButton(button, ok) {
+  const original = button.textContent;
+  button.textContent = ok ? '✓ Copied!' : 'Copy failed — try Export';
+  button.disabled = true;
+  setTimeout(() => {
+    button.textContent = original;
+    button.disabled = false;
+  }, 1800);
+}
+
 function wireToolbar() {
   $('spoilerToggle').addEventListener('change', (event) => {
     state.spoilers = event.target.checked;
     state.revealed.clear();
     saveSpoilers(state.spoilers);
     renderAll();
+  });
+  $('copyBtn').addEventListener('click', async (event) => {
+    const summary = buildProgressSummary({
+      trophies: state.trophies,
+      earned: state.earned,
+      planned: state.planned,
+      hoursLeft: estimateRemainingHours(state.trophies, state.earned),
+    });
+    try {
+      await copyProgressToClipboard(summary);
+      flashCopyButton(event.currentTarget, true);
+    } catch {
+      flashCopyButton(event.currentTarget, false);
+    }
   });
   $('exportBtn').addEventListener('click', () => {
     downloadProgress('sunset-platinum-progress.json', {
@@ -164,6 +200,36 @@ function wireTabsAndFilters() {
     state.filters.earned = event.target.value;
     renderChecklist();
   });
+  $('sortSelect').addEventListener('change', (event) => {
+    state.sort = event.target.value;
+    saveSort(state.sort);
+    renderChecklist();
+    event.currentTarget.blur();
+  });
+  $('hideEarnedToggle').addEventListener('change', (event) => {
+    state.hideEarned = event.target.checked;
+    saveHideEarned(state.hideEarned);
+    renderChecklist();
+    event.currentTarget.blur();
+  });
+}
+
+// Keyboard shortcuts: "/" focuses the search box, "h" flips the hide-earned
+// switch. Typing inside a field never triggers a shortcut.
+function wireShortcuts() {
+  document.addEventListener('keydown', (event) => {
+    const tag = event.target.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.key === '/') {
+      event.preventDefault();
+      showView('checklist');
+      $('searchInput').focus();
+    } else if (event.key === 'h') {
+      state.hideEarned = !state.hideEarned;
+      saveHideEarned(state.hideEarned);
+      renderAll();
+    }
+  });
 }
 
 async function boot() {
@@ -171,6 +237,7 @@ async function boot() {
   state.trophies = doc.trophies.slice().sort((a, b) => a.id - b.id);
   wireToolbar();
   wireTabsAndFilters();
+  wireShortcuts();
   showView(startingView());
   renderAll();
   window.__shotReady = true;

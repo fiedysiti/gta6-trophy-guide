@@ -1,10 +1,20 @@
 // Sunset Platinum — the three guide screens: the five-stage roadmap, the planned
 // route, and the missable list. Each screen reuses the trophy card builder and
 // sorts its trophies by roadmap stage so the order to play them is visible.
-import { STAGES } from './catalog.js';
+// The roadmap also shows how much hunting time each stage still holds, and the
+// planner totals the time of the route you picked.
+import { STAGES, HOURS_BY_CATEGORY } from './catalog.js';
 
 function byStageThenId(a, b) {
   return a.stage - b.stage || a.id - b.id;
+}
+
+function stageHoursLeft(members, earned) {
+  let hours = 0;
+  for (const trophy of members) {
+    if (!earned.has(trophy.name)) hours += HOURS_BY_CATEGORY[trophy.category] ?? 1;
+  }
+  return Math.round(hours);
 }
 
 export function renderRoadmap(container, trophies, earned) {
@@ -12,6 +22,8 @@ export function renderRoadmap(container, trophies, earned) {
   for (const stage of STAGES) {
     const members = trophies.filter((t) => t.stage === stage.n).sort((a, b) => a.id - b.id);
     const done = members.filter((t) => earned.has(t.name)).length;
+    const hoursLeft = stageHoursLeft(members, earned);
+    const stagePct = members.length ? Math.round((done / members.length) * 100) : 0;
     const box = document.createElement('div');
     box.className = 'roadmap-stage';
     const head = document.createElement('h3');
@@ -20,7 +32,9 @@ export function renderRoadmap(container, trophies, earned) {
     blurb.textContent = stage.blurb;
     const progress = document.createElement('p');
     progress.className = 'stage-progress';
-    progress.textContent = `${done} / ${members.length} earned in this stage`;
+    progress.textContent = hoursLeft > 0
+      ? `${done} / ${members.length} earned in this stage (${stagePct}%) · about ${hoursLeft}h left`
+      : `${done} / ${members.length} earned in this stage (${stagePct}%) · stage complete`;
     const next = members.find((t) => !earned.has(t.name));
     const nextUp = next ? document.createElement('p') : null;
     if (nextUp) {
@@ -42,17 +56,19 @@ export function renderRoadmap(container, trophies, earned) {
 
 export function renderPlanList(container, countEl, emptyEl, trophies, planned, makeCard) {
   const chosen = trophies.filter((t) => planned.has(t.name)).sort(byStageThenId);
+  const planHours = chosen.reduce((sum, t) => sum + (HOURS_BY_CATEGORY[t.category] ?? 1), 0);
   container.replaceChildren();
   for (const trophy of chosen) container.append(makeCard(trophy));
   countEl.textContent = chosen.length
-    ? `${chosen.length} ${chosen.length === 1 ? 'trophy' : 'trophies'} in your route, in roadmap order.`
+    ? `${chosen.length} ${chosen.length === 1 ? 'trophy' : 'trophies'} in your route, in roadmap order · about ${Math.round(planHours)}h of hunting.`
     : '';
   emptyEl.hidden = chosen.length > 0;
 }
 
-export function renderMissableList(container, countEl, trophies, makeCard) {
+export function renderMissableList(container, countEl, trophies, earned, makeCard) {
   const risky = trophies.filter((t) => t.missable).sort(byStageThenId);
+  const cleared = risky.filter((t) => earned.has(t.name)).length;
   container.replaceChildren();
   for (const trophy of risky) container.append(makeCard(trophy));
-  countEl.textContent = `${risky.length} missable trophies — clear them before the final story mission.`;
+  countEl.textContent = `${cleared} of ${risky.length} missable trophies cleared — finish the rest before the final story mission.`;
 }

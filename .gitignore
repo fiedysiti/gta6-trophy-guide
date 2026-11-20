@@ -1,2 +1,15 @@
+# Sunset Platinum — files git never needs to track.
+# The entry output folders are rebuilt by `node main.ts` on every run,
+# so they stay out of the repository.
 out/
 out2/
+
+# Dependencies, if any are ever added (the app itself needs none).
+node_modules/
+
+# Editor and operating-system litter.
+.DS_Store
+*.log
+
+# Scratch files from local experiments and screenshot runs.
+/tmp/

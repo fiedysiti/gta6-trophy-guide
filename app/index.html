@@ -20,12 +20,14 @@
     <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     <p class="progress-sub" id="progressPercent">0% to platinum</p>
     <p class="grade-counts" id="gradeCounts"></p>
+    <p class="stats-line" id="statsLine"></p>
   </div>
 </header>
 
 <div class="toolbar">
   <label class="spoiler-toggle"><input type="checkbox" id="spoilerToggle"> Hide story spoilers</label>
   <span class="toolbar-spacer"></span>
+  <button id="copyBtn" type="button" title="Copy a short text summary of your hunt to the clipboard">Copy progress</button>
   <button id="exportBtn" type="button">Export progress</button>
   <label class="import-btn">Import progress <input id="importFile" type="file" accept="application/json"></label>
   <button id="resetBtn" type="button">Reset</button>
@@ -66,8 +68,15 @@
         <option value="earned">Earned</option>
         <option value="missing">Not yet earned</option>
       </select></label>
+      <label>Sort <select id="sortSelect" aria-label="Sort the checklist">
+        <option value="stage">Roadmap order</option>
+        <option value="name">Name A–Z</option>
+        <option value="grade">Grade (best first)</option>
+      </select></label>
+      <label class="hide-toggle"><input type="checkbox" id="hideEarnedToggle"> Hide earned</label>
     </div>
     <p class="result-count" id="resultCount"></p>
+    <p class="kbd-hint">Shortcuts: <kbd>/</kbd> search · <kbd>h</kbd> hide earned</p>
     <div class="card-grid" id="cards"></div>
     <p class="empty-note" id="emptyNote" hidden>No trophies match these filters. Loosen one and try again.</p>
   </section>

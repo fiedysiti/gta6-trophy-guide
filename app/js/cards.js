@@ -1,11 +1,18 @@
 // Sunset Platinum — trophy cards: one card per trophy with its official name,
 // description and grade, the guide in our own words, its source, its kind and
-// missable tags, and the Earn / Plan buttons. When the spoiler setting is on, a
-// story trophy that is not earned yet shows a masked card until revealed.
+// missable tags, a rough time estimate, and the Earn / Plan buttons. When the
+// spoiler setting is on, a story trophy that is not earned yet shows a masked
+// card until revealed.
 import { categoryOf, gradeOf } from './catalog.js';
+import { hoursFor } from './filtering.js';
 
 export function isMasked(trophy, spoilers, earned, revealed) {
   return spoilers && trophy.category === 'story' && !earned.has(trophy.name) && !revealed.has(trophy.id);
+}
+
+function timeLabel(trophy) {
+  const hours = hoursFor(trophy);
+  return hours >= 1 ? `≈ ${hours}h` : `≈ ${Math.round(hours * 60)} min`;
 }
 
 export function buildTrophyCard(trophy, ctx) {
@@ -13,6 +20,7 @@ export function buildTrophyCard(trophy, ctx) {
   const masked = isMasked(trophy, spoilers, earned, revealed);
   const card = document.createElement('article');
   card.className = `card grade-${trophy.grade}${earned.has(trophy.name) ? ' earned' : ''}`;
+  card.dataset.name = trophy.name;
 
   const head = document.createElement('div');
   head.className = 'card-head';
@@ -50,6 +58,11 @@ export function buildTrophyCard(trophy, ctx) {
   stage.className = 'tag';
   stage.textContent = `Roadmap stage ${trophy.stage}`;
   tags.append(stage);
+  const time = document.createElement('span');
+  time.className = 'tag time';
+  time.textContent = timeLabel(trophy);
+  time.title = 'Rough planning estimate, not an official figure';
+  tags.append(time);
   if (trophy.missable) {
     const miss = document.createElement('span');
     miss.className = 'tag missable';
@@ -72,6 +85,7 @@ export function buildTrophyCard(trophy, ctx) {
     earn.type = 'button';
     earn.className = `earn-btn${earned.has(trophy.name) ? ' earned' : ''}`;
     earn.textContent = earned.has(trophy.name) ? '✓ Earned' : 'Mark earned';
+    earn.setAttribute('aria-pressed', earned.has(trophy.name) ? 'true' : 'false');
     earn.setAttribute('aria-label', earned.has(trophy.name) ? `Unmark ${trophy.name} as earned` : `Mark ${trophy.name} as earned`);
     earn.addEventListener('click', () => ctx.onToggleEarned(trophy.name));
     actions.append(earn);
@@ -79,6 +93,7 @@ export function buildTrophyCard(trophy, ctx) {
     plan.type = 'button';
     plan.className = `plan-btn${planned.has(trophy.name) ? ' planned' : ''}`;
     plan.textContent = planned.has(trophy.name) ? '✓ Planned' : '+ Plan';
+    plan.setAttribute('aria-pressed', planned.has(trophy.name) ? 'true' : 'false');
     plan.addEventListener('click', () => ctx.onTogglePlan(trophy.name));
     actions.append(plan);
   }

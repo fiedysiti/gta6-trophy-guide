@@ -49,6 +49,7 @@ body {
 .progress-fill { background: linear-gradient(90deg, var(--gold), var(--ember)); height: 100%; border-radius: 999px; transition: width .3s; }
 .progress-sub { margin: 0; font-size: 14px; opacity: .95; }
 .grade-counts { margin: 8px 0 0; font-size: 13px; opacity: .9; }
+.stats-line { margin: 6px 0 0; font-size: 13px; font-weight: 700; color: #ffe3c2; }
 .toolbar {
   display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   padding: 12px 22px; background: var(--plum); color: #fff;
@@ -59,6 +60,7 @@ body {
   padding: 8px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
 }
 .toolbar button:hover, .import-btn:hover { background: #ffe3c2; }
+.toolbar button:disabled { opacity: .6; cursor: default; }
 .import-btn input { display: none; }
 .spoiler-toggle { font-size: 14px; font-weight: 600; cursor: pointer; }
 .tabs { display: flex; gap: 8px; padding: 14px 22px 0; flex-wrap: wrap; }
@@ -86,6 +88,15 @@ h2 { font-size: 26px; margin: 6px 0 4px; color: var(--plum); }
   border: 1px solid #d8c3b2; border-radius: 8px; background: #fff; color: var(--ink);
 }
 .filters input[type="search"] { min-width: 240px; }
+.hide-toggle {
+  display: flex !important; flex-direction: row !important; align-items: center; gap: 6px;
+  align-self: end; padding-bottom: 9px; cursor: pointer; white-space: nowrap;
+}
+.kbd-hint { color: var(--muted); font-size: 13px; margin: 10px 2px 0; }
+.kbd-hint kbd {
+  font: inherit; font-weight: 700; background: #fff; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px;
+}
 .result-count { color: var(--muted); font-size: 14px; margin: 14px 2px; }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
 .card {
@@ -96,6 +107,7 @@ h2 { font-size: 26px; margin: 6px 0 4px; color: var(--plum); }
 .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(58, 33, 73, .14); }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
 .card.earned { border-top-color: var(--teal); background: #f2fbf6; }
+.card.earned .card-guide { color: var(--muted); }
 .card.grade-platinum { border-top-color: var(--teal); }
 .card.grade-gold { border-top-color: var(--gold); }
 .card.grade-silver { border-top-color: var(--silver); }
@@ -118,6 +130,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   background: #f6e7f5; color: var(--plum-soft);
 }
 .tag.missable { background: #ffe1e6; color: #8f0f2b; }
+.tag.time { background: #e8f6f3; color: var(--teal); }
 .card-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 6px; }
 .card-actions button {
   font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
@@ -150,4 +163,8 @@ footer { padding: 8px 22px 28px; color: var(--muted); font-size: 13px; max-width
   .hero, .toolbar, .tabs, main { padding-left: 14px; padding-right: 14px; }
   .roadmap-list { columns: 1; }
   .progress-card { min-width: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .progress-fill { transition: none; }
+  .card:hover { transform: none; }
 }
