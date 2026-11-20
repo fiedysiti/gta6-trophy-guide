@@ -1,47 +1,32 @@
-// Sunset Platinum — a GTA 6 trophy guide entry for gta6-trophy-guide-01.
+// Sunset Platinum — the entry program for gta6-trophy-guide-01 (Node 22, standard
+// library only). It hands the guide in: it copies this repository's app/ and
+// screenshots/ into the output directory and writes /output/dossier.json, the
+// summary the judge reads, using the vendored make.fun library. The copy is a
+// plain file copy, so running it twice over the same inputs writes the same
+// bytes every time.
 //
-// main.ts (Node 22, standard library only) hands the guide in. The guide
-// itself is plain static files under app/ (index.html, ES modules, CSS and
-// app/data/trophies.json) plus 3-4 screenshots under screenshots/. This
-// program copies both trees into the output directory and writes
-// dossier.json with the vendored make.fun library, which is the summary the
-// judge reads. vendor/makefun-frontend.ts is the kit's copy, unchanged.
-//
-// Run it locally with:
+// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-// Outside the grader, MAKEFUN_OUTPUT_DIR stands in for /output.
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-frontend.ts';
 
-const repoRoot = fileURLToPath(new URL('.', import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const here = fileURLToPath(new URL('.', import.meta.url));
+const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-function copyGuideTree(): void {
-  mkdirSync(outputDir, { recursive: true });
-  const appOut = join(outputDir, 'app');
-  rmSync(appOut, { recursive: true, force: true });
-  cpSync(join(repoRoot, 'app'), appOut, { recursive: true });
-  const shotsOut = join(outputDir, 'screenshots');
-  rmSync(shotsOut, { recursive: true, force: true });
-  mkdirSync(shotsOut, { recursive: true });
-  if (existsSync(join(repoRoot, 'screenshots'))) {
-    cpSync(join(repoRoot, 'screenshots'), shotsOut, { recursive: true });
-  }
-}
+mkdirSync(out, { recursive: true });
+cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
+mkdirSync(join(out, 'screenshots'), { recursive: true });
+if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
 
-function writeGuideDossier(): void {
-  const dossierText = buildDossier(outputDir, {
-    text_max_bytes: 163840,
-    screenshots: { max: 4, max_bytes: 262144 },
-    app_max_files: 993,
-    app_max_bytes: 50331648,
-  });
-  writeFileSync(join(outputDir, 'dossier.json'), dossierText);
-}
-
-copyGuideTree();
-writeGuideDossier();
-console.log(`Guide handed in at ${outputDir}`);
+// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the
+// bytes; the others refuse an entry the scorer would refuse (more than 4
+// screenshots or one over 256 KiB; more than 993 files and directories in app/
+// or 48 MiB of app files).
+writeFileSync(
+  join(out, 'dossier.json'),
+  buildDossier(out, { text_max_bytes: 163840, screenshots: { max: 4, max_bytes: 262144 }, app_max_files: 993, app_max_bytes: 50331648 }),
+);
+console.log(`Sunset Platinum entry written to ${out} (app/ + screenshots/ + dossier.json).`);

@@ -3,121 +3,106 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sunset Platinum — GTA 6 Trophy Guide &amp; Tracker</title>
-<meta name="description" content="Offline guide and tracker for all 55 GTA 6 PlayStation 5 trophies: checklist, roadmap to the platinum, missables, and a cited guide for every trophy.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
+<title>Sunset Platinum — GTA VI Trophy Guide &amp; Tracker</title>
+<meta name="description" content="An offline guide and tracker for all 55 Grand Theft Auto VI trophies on PlayStation 5: checklist, roadmap, planner and missable warnings.">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <p class="brand-kicker">Grand Theft Auto VI &middot; PlayStation 5</p>
+<noscript><p style="padding:16px 22px">Sunset Platinum needs JavaScript to load its trophy list and save your progress.</p></noscript>
+<header class="hero">
+  <div class="hero-text">
+    <p class="kicker">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 trophies</p>
     <h1>Sunset Platinum</h1>
-    <p class="brand-sub">The offline trophy guide &amp; tracker &mdash; all 55 trophies, every guide cited.</p>
+    <p class="tagline">Chase every trophy across Leonida as the sun goes down — one checklist, one roadmap, one platinum.</p>
   </div>
-  <div class="progress-card" id="progressCard">
-    <p class="progress-big"><span id="earnedCount">0</span><span class="progress-of"> / 55</span></p>
-    <p class="progress-label">trophies earned</p>
-    <div class="progress-bar" role="progressbar" aria-label="Trophies earned"><div class="progress-fill" id="progressFill"></div></div>
-    <p class="progress-grades" id="gradeCounts"></p>
-    <p class="progress-next" id="nextUpLine"></p>
+  <div class="progress-card" aria-label="Overall progress">
+    <p class="progress-number"><span id="progressText">0 / 55 earned</span></p>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <p class="progress-sub" id="progressPercent">0% to platinum</p>
+    <p class="grade-counts" id="gradeCounts"></p>
   </div>
 </header>
 
-<nav class="tabs" aria-label="Guide sections">
-  <button type="button" class="tab is-active" data-view="checklist">Checklist</button>
-  <button type="button" class="tab" data-view="roadmap">Roadmap to Platinum</button>
-  <button type="button" class="tab" data-view="missables">Missables</button>
-  <button type="button" class="tab" data-view="planner">Next up</button>
-  <button type="button" class="tab" data-view="settings">Settings &amp; save</button>
+<div class="toolbar">
+  <label class="spoiler-toggle"><input type="checkbox" id="spoilerToggle"> Hide story spoilers</label>
+  <span class="toolbar-spacer"></span>
+  <button id="exportBtn" type="button">Export progress</button>
+  <label class="import-btn">Import progress <input id="importFile" type="file" accept="application/json"></label>
+  <button id="resetBtn" type="button">Reset</button>
+</div>
+
+<nav class="tabs" aria-label="Views">
+  <button type="button" data-view="checklist" class="tab active">Checklist</button>
+  <button type="button" data-view="roadmap" class="tab">Roadmap</button>
+  <button type="button" data-view="planner" class="tab">Planner</button>
+  <button type="button" data-view="missables" class="tab">Missables <span class="tab-badge" id="missableBadge"></span></button>
 </nav>
 
 <main>
-  <section id="view-checklist" class="view is-active" aria-label="Trophy checklist">
-    <div class="toolbar">
-      <label class="search-box">Search <input id="searchInput" type="search" placeholder="Trophy, mission or keyword&hellip;" autocomplete="off"></label>
-      <div class="kind-filters" role="group" aria-label="Filter by kind">
-        <button type="button" class="chip is-active" data-kind="all">All</button>
-        <button type="button" class="chip" data-kind="story">Story</button>
-        <button type="button" class="chip" data-kind="missable">Missable</button>
-        <button type="button" class="chip" data-kind="collectibles">Collectibles</button>
-        <button type="button" class="chip" data-kind="activities">Activities</button>
-      </div>
-      <label class="grade-filter">Grade
-        <select id="gradeSelect">
-          <option value="all">All grades</option>
-          <option value="platinum">Platinum</option>
-          <option value="gold">Gold</option>
-          <option value="silver">Silver</option>
-          <option value="bronze">Bronze</option>
-        </select>
-      </label>
-      <label class="toggle"><input id="hideEarned" type="checkbox"> Hide earned</label>
-      <label class="toggle"><input id="spoilerToggle" type="checkbox"> Spoiler-safe: hide un-earned story trophies</label>
+  <section id="view-checklist" class="view active">
+    <div class="filters">
+      <label>Search <input id="searchInput" type="search" placeholder="Trophy name or guide word…"></label>
+      <label>Grade <select id="gradeFilter">
+        <option value="all">All grades</option>
+        <option value="platinum">Platinum</option>
+        <option value="gold">Gold</option>
+        <option value="silver">Silver</option>
+        <option value="bronze">Bronze</option>
+      </select></label>
+      <label>Kind <select id="categoryFilter">
+        <option value="all">All kinds</option>
+        <option value="story">Story</option>
+        <option value="side">Side</option>
+        <option value="collectible">Collectible</option>
+        <option value="activity">Activity</option>
+      </select></label>
+      <label>Missable <select id="missableFilter">
+        <option value="all">Any</option>
+        <option value="yes">Missable only</option>
+        <option value="no">Not missable</option>
+      </select></label>
+      <label>Status <select id="earnedFilter">
+        <option value="all">All</option>
+        <option value="earned">Earned</option>
+        <option value="missing">Not yet earned</option>
+      </select></label>
     </div>
-    <p class="result-line" id="resultLine"></p>
-    <div class="layout">
-      <ul class="trophy-list" id="trophyList"></ul>
-      <aside class="detail" id="detailPane" aria-live="polite"></aside>
-    </div>
+    <p class="result-count" id="resultCount"></p>
+    <div class="card-grid" id="cards"></div>
+    <p class="empty-note" id="emptyNote" hidden>No trophies match these filters. Loosen one and try again.</p>
   </section>
 
-  <section id="view-roadmap" class="view" aria-label="Roadmap to the platinum">
+  <section id="view-roadmap" class="view">
     <h2>Roadmap to the platinum</h2>
-    <p class="section-intro">Built from the official trophy descriptions alone: play the story first, clear the named missions and stranger strands as they appear, then sweep activities and collectibles, and finish with the 100% cleanup. No mission chapter is guessed here — a stage names only what the official descriptions name.</p>
-    <ol class="roadmap" id="roadmapList"></ol>
-    <p class="section-note">Launch-night context (Exophase, 638 tracked players, 19 Nov 2026): the opening trophy sat at 100%, the story chapters at about 1%, and the platinum at 0.63% — those early numbers came from reviewers and day-one players, and they fall as more players join tracking.</p>
+    <p class="section-intro">Five stages, in the order to play them. Finish one stage before the next and the platinum follows on its own.</p>
+    <div id="roadmap"></div>
   </section>
 
-  <section id="view-missables" class="view" aria-label="Missable trophies">
-    <h2>Missables — earn these on your first pass</h2>
-    <p class="section-intro">GTA 6 has no confirmed mission replay at launch, so anything tied to a named mission or a one-time story moment should be done while it is in front of you. Each card below says exactly what can be missed and when.</p>
-    <ul class="trophy-list missable-list" id="missableList"></ul>
+  <section id="view-planner" class="view">
+    <h2>Planner</h2>
+    <p class="section-intro">Tap “+ Plan” on any trophy card to add it here. Your route is sorted by roadmap stage, so you always know what to hunt next.</p>
+    <p class="result-count" id="planCount"></p>
+    <div class="card-grid" id="planner"></div>
+    <p class="empty-note" id="planEmpty">Nothing planned yet. Add trophies from the checklist and your route will appear here.</p>
   </section>
 
-  <section id="view-planner" class="view" aria-label="Next up planner">
-    <h2>Next up — your five easiest wins</h2>
-    <p class="section-intro">The planner ranks your un-earned trophies by difficulty, then by roadmap order, so the next thing to chase is always the cheapest win. Earn one and the list re-ranks itself.</p>
-    <ol class="planner-list" id="plannerList"></ol>
-  </section>
-
-  <section id="view-settings" class="view" aria-label="Settings and save">
-    <h2>Settings &amp; save</h2>
-    <div class="settings-grid">
-      <div class="settings-card">
-        <h3>Your progress</h3>
-        <p id="saveSummary"></p>
-        <div class="button-row">
-          <button type="button" id="exportBtn">Export progress (.json)</button>
-          <label class="import-label">Import progress <input id="importInput" type="file" accept="application/json,.json"></label>
-        </div>
-        <p class="fineprint">Export downloads a small JSON file with your earned trophies, notes and counters. Import reads only that file, on your machine — nothing is uploaded anywhere.</p>
-        <p class="fineprint" id="importStatus" role="status"></p>
-      </div>
-      <div class="settings-card">
-        <h3>Spoilers</h3>
-        <label class="toggle"><input id="spoilerToggleSettings" type="checkbox"> Spoiler-safe: hide un-earned story trophy names &amp; descriptions</label>
-        <p class="fineprint">Hidden trophies show as &ldquo;Hidden story trophy&rdquo; until you tick them earned. The platinum itself is never hidden.</p>
-      </div>
-      <div class="settings-card">
-        <h3>Reset</h3>
-        <p class="fineprint">Clears every earned tick, note and counter stored in this browser.</p>
-        <button type="button" id="resetBtn" class="danger">Reset all progress</button>
-      </div>
-      <div class="settings-card">
-        <h3>About this guide</h3>
-        <p class="fineprint">Official names, descriptions and grades: the official list on Exophase. PSN tracked counts: PSNProfiles. Launch-night earn rates: Exophase, 638 tracked players, 19 Nov 2026. Every guide is written in our own words; where a place or step is not pinned down by a source, the guide says so. No Rockstar logo or official artwork is used. Works fully offline.</p>
-        <p class="fineprint">55 trophies: 1 platinum, 2 gold, 6 silver, 46 bronze. 28 hidden on PlayStation. All single-player, no online trophies.</p>
-      </div>
+  <section id="view-missables" class="view">
+    <h2>Missables — read before the finale</h2>
+    <div class="warning-box">
+      <strong>⚠ Spoiler warning.</strong> These trophies can be locked out if you pass the wrong moment.
+      Finish the strand finales and one-shot moments below <em>before</em> the final story mission.
+      Story names stay hidden while the spoiler setting is on — tap “Reveal” on a card to see one.
     </div>
+    <p class="result-count" id="missableCount"></p>
+    <div class="card-grid" id="missableList"></div>
   </section>
 </main>
 
 <footer>
-  <p>Sunset Platinum — an unofficial fan guide. Grand Theft Auto and Rockstar Games are trademarks of their owners; this guide is not affiliated with or endorsed by them.</p>
+  <p>Sources: trophy names, descriptions and grades are the official PlayStation 5 list as published via
+  Exophase / PSNProfiles (2026-11-18). Every guide on this page is written for this entry in its own words.
+  Works fully offline — no network requests, progress stays in your browser.</p>
 </footer>
-
-<script type="module" src="js/main.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

@@ -1,69 +1,42 @@
-# Sunset Platinum — GTA 6 Trophy Guide & Tracker
+# Sunset Platinum
 
-[![make.fun · gta6-trophy-guide-01](https://make.fun/badge/gta6-trophy-guide-01.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
-[![rank](https://make.fun/badge/gta6-trophy-guide-01/fiedysiti/gta6-trophy-guide/rank.svg)](https://make.fun/bounty/gta6-trophy-guide-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
-[![reward](https://make.fun/badge/gta6-trophy-guide-01/fiedysiti/gta6-trophy-guide/reward.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
+[![gta6-trophy-guide-01](https://make.fun/badge/gta6-trophy-guide-01.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
+[![Rank](https://make.fun/badge/gta6-trophy-guide-01/fiedysiti/gta6-trophy-guide/rank.svg)](https://make.fun/bounty/gta6-trophy-guide-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
+[![Reward](https://make.fun/badge/gta6-trophy-guide-01/fiedysiti/gta6-trophy-guide/reward.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
 
-An offline, open-source web app that guides and tracks all 55 PlayStation 5
-trophies of **Grand Theft Auto VI** (released 19 November 2026): 1 platinum,
-2 gold, 6 silver, 46 bronze — 28 of them hidden on PlayStation until earned,
-all single-player.
+Sunset Platinum is an offline guide and tracker for all 55 Grand Theft Auto VI trophies on PlayStation 5, dressed in a sunset over Leonida. It pairs a saveable checklist with a five-stage roadmap to the platinum, a planner for your own route, and spoiler-safe warnings for the trophies you can lock yourself out of.
 
 ## What it does
 
-- **Checklist tracker** — every trophy with its official name, description
-  and grade. Tick trophies off; progress is saved in the browser
-  (localStorage) and can be exported to a file and imported back.
-- **Guide for every trophy** — how to unlock it, how hard it is, and when it
-  can be missed, written in our own words, with the source of each fact
-  named beside the guide (Exophase for the official name/description/grade,
-  PSNProfiles for PSN's tracked counts, and our own advice drawn from the
-  official description where a place is not yet pinned down).
-- **Filters** — by kind (story, missable, collectibles, activities), by
-  grade, by earned state, plus full-text search.
-- **Spoiler setting** — hides the names and descriptions of un-earned story
-  trophies until you earn them.
-- **Roadmap to the platinum** — the order to earn trophies in, from the
-  opening mission to 100% completion, built from the official descriptions.
-- **Missables page** — every trophy that can be missed, with its warning.
-- **Next-up planner** — the five easiest un-earned trophies to chase next.
-- **Notes & counters** — a note per trophy, and a progress counter for
-  trophies PSN tracks with a count (42 Shooting Range challenges, 250
-  stunts, 100 WAiNK locations, and more).
-- **Fully offline** — static files only, no network request at run time, no
-  Rockstar logo or official artwork. The look is our own.
+- **Checklist** — tick trophies off as you earn them; progress, a progress bar and per-grade counts update live and are saved in your browser (localStorage), with export and import as a JSON file.
+- **Filters** — narrow the list by grade (platinum / gold / silver / bronze), kind (story / side / collectible / activity), missable status, earned status, or free-text search.
+- **Roadmap** — five stages in play order: story first run, side strands and one-shot moments, collectibles and exploration, activities and races, then cleanup and the platinum.
+- **Planner** — add any trophy to your route from its card; the plan is shown in roadmap order so you always know what to hunt next.
+- **Missables** — the 12 trophies that can be missed, with a warning to clear them before the final story mission.
+- **Spoiler setting** — with “Hide story spoilers” on, unrevealed story trophies stay masked until earned or tapped open.
+- **Every trophy** shows its official name, description and grade, a guide written for this entry, and the source it cites (official PS5 trophy list via Exophase / PSNProfiles).
+
+## Files
+
+- `app/index.html`, `app/style.css`, `app/app.js` — the page, the sunset theme and the bootstrap.
+- `app/js/` — one module per job: `storage.js` (localStorage, export/import), `catalog.js` (trophy data and roadmap stages), `filtering.js` (search and filters), `cards.js` (trophy cards and spoiler masking), `screens.js` (roadmap, planner, missables).
+- `app/data/trophies.json` — the 55 official trophies with guides and sources.
+- `main.ts` — the entry program (writes `dossier.json`); `serve.ts` — the local server (GET and HEAD only).
 
 ## Run it
 
-Serve `app/` with any static server, then open `index.html`:
-
 ```sh
-python3 -m http.server 8080 --directory app
-# or: node serve.mjs  (serves app/ on http://localhost:8080)
+node serve.ts
 ```
 
-## Hand it in (make.fun)
+Then open http://localhost:8080. The app is plain static files under `app/` and works with the network off; no build step, no dependencies.
+
+To hand the entry in (writes `dossier.json` beside the copied app and screenshots):
 
 ```sh
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-`main.ts` (Node 22, standard library only) copies `app/` and `screenshots/`
-into the output directory and writes `dossier.json` with the vendored
-`vendor/makefun-frontend.ts` library.
+## Referral
 
-## Sources
-
-- Official trophy names, descriptions and grades: the official list on
-  Exophase — https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/
-- PSN tracked counts (42 Shooting Range challenges, 100 WAiNK locations,
-  and the rest): PSNProfiles —
-  https://psnprofiles.com/trophies/43531-grand-theft-auto-vi
-- Launch-night earn rates quoted in the app (638 tracked players, 19 Nov
-  2026): Exophase, as recorded in the competition kit.
-- Every guide sentence is our own. Where a specific place or step is not
-  pinned down by a source, the guide says so instead of inventing one.
-
-## License
-
-MIT — see `LICENSE`.
+Built with make.fun — try it with referral code `3debkpg7`.
