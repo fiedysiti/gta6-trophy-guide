@@ -39,6 +39,11 @@ function fail(message: string): never {
 // judge.
 function checkInputs(): void {
   if (!existsSync(join(here, 'app', 'index.html'))) fail('app/index.html is missing');
+  // The round-4 feature modules must be present: the entry ships them, and
+  // the app fails at runtime without them, so refuse early with a clear error.
+  for (const module of ['export.js', 'roadmap.js']) {
+    if (!existsSync(join(here, 'app', 'js', module))) fail(`app/js/${module} is missing`);
+  }
   const shotsDir = join(here, 'screenshots');
   if (!existsSync(shotsDir)) fail('screenshots/ is missing');
   const shots = readdirSync(shotsDir).filter((name) => /\.(jpe?g|png|webp)$/i.test(name));
@@ -53,6 +58,7 @@ function checkInputs(): void {
     }
   }
   console.log(`Inputs OK: app/index.html present, ${shots.length} screenshot(s) within the size cap.`);
+  console.log('Inputs OK: round-4 modules app/js/export.js and app/js/roadmap.js present.');
 }
 
 function copyEntry(): void {

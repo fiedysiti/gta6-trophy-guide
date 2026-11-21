@@ -52,6 +52,13 @@ createServer((request, response) => {
     log(request.method ?? '?', path, 405);
     return;
   }
+  // A tiny readiness probe for scripts that wait on the server (screenshot
+  // runs, smoke tests): /healthz answers without touching the app files.
+  if (path === '/healthz' || path.startsWith('/healthz?')) {
+    response.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' }).end('ok');
+    log(request.method, path, 200, 2);
+    return;
+  }
   const url = new URL(path, 'http://localhost');
   let pathname;
   try {

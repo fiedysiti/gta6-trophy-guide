@@ -62,3 +62,11 @@ export function gradeRank(grade) {
 export function stageTitle(n) {
   return STAGES.find((stage) => stage.n === n)?.title ?? `Stage ${n}`;
 }
+
+// Every missable trophy in the catalogue, in roadmap order — the list the
+// four-phase roadmap and the missables screen warn about. After the
+// PowerPyx check (2026-11-21) this is exactly one trophy: Positive Mental
+// Attitude, whose Chapter 1 meditation can be missed.
+export function missableTrophies(trophies) {
+  return trophies.filter((t) => t.missable).sort((a, b) => a.stage - b.stage || a.id - b.id);
+}

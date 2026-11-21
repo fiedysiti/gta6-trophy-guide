@@ -9,6 +9,19 @@ export const SPOILER_KEY = 'sunset-platinum-spoilers-v1';
 export const HIDE_EARNED_KEY = 'sunset-platinum-hide-earned-v1';
 export const SORT_KEY = 'sunset-platinum-sort-v1';
 
+// The format version stamped on every progress export. Bumped only when the
+// export shape changes, so an old file can still be recognised and refused
+// with a clear message instead of importing half-blind.
+export const STORAGE_VERSION = 1;
+
+// Replace the whole saved progress at once, after the caller has validated
+// the incoming names — the single write path the import feature uses, so an
+// import is never half applied.
+export function replaceProgress(earned, planned) {
+  saveIdSet(EARNED_KEY, new Set(earned));
+  saveIdSet(PLAN_KEY, new Set(planned));
+}
+
 export function loadIdSet(key) {
   try {
     const raw = localStorage.getItem(key);

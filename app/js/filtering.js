@@ -24,6 +24,7 @@ export function applyFilters(trophies, filters, earned) {
     if (filters.category !== 'all' && trophy.category !== filters.category) return false;
     if (filters.missable === 'yes' && !trophy.missable) return false;
     if (filters.missable === 'no' && trophy.missable) return false;
+    if (filters.missableOnly && !trophy.missable) return false;
     const hasIt = earned.has(trophy.name);
     if (filters.hideEarned && hasIt) return false;
     if (filters.earned === 'earned' && !hasIt) return false;
@@ -40,6 +41,12 @@ export function applyFilters(trophies, filters, earned) {
 // and the copy-progress summary warn about.
 export function openMissables(trophies, earned) {
   return trophies.filter((t) => t.missable && !earned.has(t.name));
+}
+
+// The "missable only" shortcut: every missable trophy, in roadmap order,
+// regardless of earned state — the list the missables screen renders.
+export function missableOnly(trophies) {
+  return trophies.filter((t) => t.missable).sort((a, b) => a.stage - b.stage || a.id - b.id);
 }
 
 export function countByGrade(trophies, earned) {

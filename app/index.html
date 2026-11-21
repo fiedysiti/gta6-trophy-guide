@@ -28,9 +28,11 @@
   <label class="spoiler-toggle"><input type="checkbox" id="spoilerToggle"> Hide story spoilers</label>
   <span class="toolbar-spacer"></span>
   <button id="copyBtn" type="button" title="Copy a short text summary of your hunt to the clipboard">Copy progress</button>
+  <button id="copySummaryBtn" type="button" title="Copy the one-line summary: X/55 trophies (Y%) — Z missable tersisa">Copy summary</button>
   <button id="exportBtn" type="button">Export progress</button>
   <label class="import-btn">Import progress <input id="importFile" type="file" accept="application/json"></label>
   <button id="resetBtn" type="button">Reset</button>
+  <span class="export-status" id="exportStatus" role="status"></span>
 </div>
 
 <nav class="tabs" aria-label="Views">
@@ -84,6 +86,10 @@
   <section id="view-roadmap" class="view">
     <h2>Roadmap to the platinum</h2>
     <p class="section-intro">Five stages, in the order to play them. Finish one stage before the next and the platinum follows on its own.</p>
+    <h3>Four-phase playthrough</h3>
+    <p class="section-intro">The same road, grouped by kind instead of by stage: story, side strands, collectibles, then cleanup. Each phase counts what you have earned and warns about its missable trophies before you move on.</p>
+    <p class="section-intro"><strong>Only one trophy can be missed:</strong> Positive Mental Attitude — meditate with Lucia on the balcony in Chapter 1, before the chapter ends (PowerPyx).</p>
+    <div id="roadmapPhases" class="roadmap-phases"></div>
     <div id="roadmap"></div>
   </section>
 
@@ -98,8 +104,7 @@
   <section id="view-missables" class="view">
     <h2>Missables — read before the finale</h2>
     <div class="warning-box">
-      <strong>⚠ Spoiler warning.</strong> These trophies can be locked out if you pass the wrong moment.
-      Finish the strand finales and one-shot moments below <em>before</em> the final story mission.
+      <strong>⚠ Spoiler warning.</strong> Only one trophy can be missed: Positive Mental Attitude — meditate with Lucia on the balcony in Chapter 1, before the chapter ends. Do it early; everything else stays available in free-roam after the story.
       Story names stay hidden while the spoiler setting is on — tap “Reveal” on a card to see one.
     </div>
     <p class="result-count" id="missableCount"></p>
@@ -112,6 +117,8 @@
   Exophase / PSNProfiles (2026-11-18). Every guide on this page is written for this entry in its own words.
   Works fully offline — no network requests, progress stays in your browser.</p>
 </footer>
+<script type="module" src="js/export.js"></script>
+<script type="module" src="js/roadmap.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -6,10 +6,11 @@
 import { loadCatalog } from './js/catalog.js';
 import { applyFilters, countByGrade, estimateRemainingHours, openMissables, sortTrophies } from './js/filtering.js';
 import { buildTrophyCard } from './js/cards.js';
-import { renderMissableList, renderPlanList, renderRoadmap } from './js/screens.js';
+import { renderMissableList, renderPlanList, renderRoadmapScreen } from './js/screens.js';
+import { EXPORT_FILENAME, copySummary, exportProgress, importProgress } from './js/export.js';
 import {
   EARNED_KEY, PLAN_KEY, buildProgressSummary, copyProgressToClipboard,
-  downloadProgress, loadHideEarned, loadIdSet, loadSort, loadSpoilers, readProgressFile,
+  loadHideEarned, loadIdSet, loadSort, loadSpoilers,
   saveHideEarned, saveIdSet, saveSort, saveSpoilers,
 } from './js/storage.js';
 
@@ -86,7 +87,7 @@ function renderChecklist() {
 function renderAll() {
   renderProgress();
   renderChecklist();
-  renderRoadmap($('roadmap'), state.trophies, state.earned);
+  renderRoadmapScreen($('roadmap'), $('roadmapPhases'), state.trophies, state.earned);
   renderPlanList($('planner'), $('planCount'), $('planEmpty'), state.trophies, state.planned, (t) => buildTrophyCard(t, cardContext()));
   renderMissableList($('missableList'), $('missableCount'), state.trophies, state.earned, (t) => buildTrophyCard(t, cardContext()));
   $('spoilerToggle').checked = state.spoilers;
@@ -123,6 +124,13 @@ function flashCopyButton(button, ok) {
   }, 1800);
 }
 
+// One line under the toolbar reporting the last export / import / copy, so
+// an import that skipped unknown trophies is visible instead of silent.
+function showExportStatus(message) {
+  const el = $('exportStatus');
+  if (el) el.textContent = message;
+}
+
 function wireToolbar() {
   $('spoilerToggle').addEventListener('change', (event) => {
     state.spoilers = event.target.checked;
@@ -144,24 +152,31 @@ function wireToolbar() {
       flashCopyButton(event.currentTarget, false);
     }
   });
+  $('copySummaryBtn').addEventListener('click', async (event) => {
+    try {
+      const text = await copySummary(state.trophies, state.earned);
+      showExportStatus(text);
+      flashCopyButton(event.currentTarget, true);
+    } catch {
+      flashCopyButton(event.currentTarget, false);
+    }
+  });
   $('exportBtn').addEventListener('click', () => {
-    downloadProgress('sunset-platinum-progress.json', {
-      earned: [...state.earned],
-      plan: [...state.planned],
-    });
+    const payload = exportProgress(state.trophies, state.earned, state.planned);
+    showExportStatus(`Exported ${payload.progress.earned.length} earned and ${payload.progress.plan.length} planned trophies to ${EXPORT_FILENAME}.`);
   });
   $('importFile').addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     try {
-      const { earned, plan } = await readProgressFile(file);
-      state.earned = new Set(earned.filter((n) => state.trophies.some((t) => t.name === n)));
-      state.planned = new Set(plan.filter((n) => state.trophies.some((t) => t.name === n)));
-      saveIdSet(EARNED_KEY, state.earned);
-      saveIdSet(PLAN_KEY, state.planned);
+      const result = await importProgress(file, state.trophies);
+      state.earned = result.earned;
+      state.planned = result.plan;
       renderAll();
-    } catch {
-      alert('That file could not be imported — it is not a Sunset Platinum progress file.');
+      showExportStatus(`Imported ${result.earned.size} earned and ${result.plan.size} planned trophies${result.skipped ? ` — ${result.skipped} unknown names skipped` : ''}.`);
+    } catch (error) {
+      showExportStatus(`Import failed: ${error.message}`);
+      alert(`That file could not be imported: ${error.message}`);
     }
     event.target.value = '';
   });

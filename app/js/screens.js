@@ -4,6 +4,8 @@
 // The roadmap also shows how much hunting time each stage still holds, and the
 // planner totals the time of the route you picked.
 import { STAGES, HOURS_BY_CATEGORY } from './catalog.js';
+import { missableOnly } from './filtering.js';
+import { renderPhaseRoadmap } from './roadmap.js';
 
 function byStageThenId(a, b) {
   return a.stage - b.stage || a.id - b.id;
@@ -54,6 +56,13 @@ export function renderRoadmap(container, trophies, earned) {
   }
 }
 
+// One call renders the whole roadmap screen: the five numbered stages above
+// and the four-phase playthrough below them, both from the same live state.
+export function renderRoadmapScreen(container, phasesContainer, trophies, earned) {
+  renderRoadmap(container, trophies, earned);
+  renderPhaseRoadmap(phasesContainer, trophies, earned);
+}
+
 export function renderPlanList(container, countEl, emptyEl, trophies, planned, makeCard) {
   const chosen = trophies.filter((t) => planned.has(t.name)).sort(byStageThenId);
   const planHours = chosen.reduce((sum, t) => sum + (HOURS_BY_CATEGORY[t.category] ?? 1), 0);
@@ -66,9 +75,9 @@ export function renderPlanList(container, countEl, emptyEl, trophies, planned, m
 }
 
 export function renderMissableList(container, countEl, trophies, earned, makeCard) {
-  const risky = trophies.filter((t) => t.missable).sort(byStageThenId);
+  const risky = missableOnly(trophies);
   const cleared = risky.filter((t) => earned.has(t.name)).length;
   container.replaceChildren();
   for (const trophy of risky) container.append(makeCard(trophy));
-  countEl.textContent = `${cleared} of ${risky.length} missable trophies cleared — finish the rest before the final story mission.`;
+  countEl.textContent = `${cleared} of ${risky.length} missable trophies cleared — do the rest in Chapter 1, before the chapter ends.`;
 }

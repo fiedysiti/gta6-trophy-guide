@@ -30,6 +30,16 @@ export function buildTrophyCard(trophy, ctx) {
   badge.className = `grade-badge ${trophy.grade}`;
   badge.textContent = gradeOf(trophy);
   head.append(title, badge);
+  // A missable trophy gets its own badge up in the card head, not just a tag
+  // below — it is the one thing a player must not scroll past. PowerPyx
+  // (2026-11-21) flags only Positive Mental Attitude, so this badge is rare.
+  if (trophy.missable && !masked) {
+    const missableBadge = document.createElement('span');
+    missableBadge.className = 'missable-badge';
+    missableBadge.textContent = '⚠ Missable — do it early';
+    missableBadge.title = 'This trophy can be missed — finish it before the moment passes.';
+    head.append(missableBadge);
+  }
   card.append(head);
 
   const desc = document.createElement('p');

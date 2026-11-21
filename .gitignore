@@ -12,4 +12,6 @@ node_modules/
 *.log
 
 # Scratch files from local experiments and screenshot runs.
+# Local test exports from the progress export feature (sunset-platinum-progress.json).
+*-progress.json
 /tmp/
